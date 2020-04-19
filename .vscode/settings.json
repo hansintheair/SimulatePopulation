@@ -1,3 +1,4 @@
 {
-    "editor.minimap.size": "fit"
+    "editor.minimap.size": "fit",
+    "python.pythonPath": "C:\\Python37\\envs\\sci\\python.exe"
 }
