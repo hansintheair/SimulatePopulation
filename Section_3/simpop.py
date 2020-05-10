@@ -199,12 +199,12 @@ class Environment():
                ):
                 organism.motion.vy = -organism.motion.vy
             # organism collides with other organsim
-            target = next( (target for
+            targets = (target for
                             target in
                             queue if
                             target is not organism and collision(organism, target)
-                            ), None)
-            if bool(target):
+                            )
+            for target in targets:
                 resolve_collision(organism, target)
             # Update organism position
             organism()
@@ -224,7 +224,6 @@ class Environment():
         self() #Advance simulation by one frame
 
     def run(self, n_period):
-        plt.rcParams["animation.html"] = "jshtml"
         return animation.FuncAnimation(self._fig,
                                        self.fig_animate,
                                        init_func=self.fig_init,
