@@ -205,8 +205,6 @@ class Environment():
                             target is not organism and collision(organism, target)
                             )
             for target in targets:
-                print(target)
-                print(distance(organism, target))
                 resolve_collision(organism, target)
             # Update organism position
             organism()
