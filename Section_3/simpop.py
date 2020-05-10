@@ -186,9 +186,10 @@ class Environment():
         # survive, expire, births = [], [], []
 
         # Update organism motion
-        resolved = []
-        for organism in self.ents.population:
+        queue = deque(self.ents.population)
+        while len(queue) > 0:
             # Organism collides with extent boundary
+            organism = queue.pop()
             if (organism.x >= (self.extent.width - organism.radius) or 
                 organism.x <= (0 + organism.radius)
                ):
@@ -200,14 +201,12 @@ class Environment():
             # organism collides with other organsim
             target = next( (target for
                             target in
-                            self.ents.population if
+                            queue if
                             target is not organism and collision(organism, target)
                             ), None)
-            if bool(target) and target not in resolved:
+            if bool(target):
                 resolve_collision(organism, target)
-                resolved.append(organism)
-        # Update organism position
-        for organism in self.ents.population:
+            # Update organism position
             organism()
 
             
