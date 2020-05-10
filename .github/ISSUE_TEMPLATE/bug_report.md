@@ -2,8 +2,8 @@
 name: Bug report
 about: New bug report
 title: ''
-labels: ''
-assignees: ''
+labels: bug
+assignees: hansintheair
 
 ---
 
