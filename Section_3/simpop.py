@@ -41,8 +41,10 @@ class Extent():
     
     def contains(self, entity):
         """ Check whether entity is contained completely within bounds of extent"""
-        return (entity.x <= (self.width - entity.radius) and entity.x >= (0 + entity.radius) and
-                entity.y <= (self.height - entity.radius) and entity.y >= (0 + entity.radius))
+        return (entity.x <= (self.width - entity.radius) and
+                entity.x >= (0 + entity.radius) and
+                entity.y <= (self.height - entity.radius) and
+                entity.y >= (0 + entity.radius))
 
 
 class Entity(ABC):
@@ -224,7 +226,10 @@ class Environment():
 
     def run(self, n_period):
         plt.rcParams["animation.html"] = "jshtml"
-        return animation.FuncAnimation(self._fig, self.fig_animate, init_func=self.fig_init, frames=n_period)
+        return animation.FuncAnimation(self._fig,
+                                       self.fig_animate,
+                                       init_func=self.fig_init,
+                                       frames=n_period)
 
 
         ##TODO
@@ -253,6 +258,7 @@ class Environment():
             ent = entity.spawn(self.extent)
             # Must spawn inside of habitat and must not overlap with others
             if self.extent.contains(ent):
-                if not any(collision(ent, target) for group in self.ents for target in group):
+                if not any(collision(ent, target) for group in self.ents 
+                           for target in group):
                     return ent                
         
