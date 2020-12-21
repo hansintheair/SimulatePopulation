@@ -1,6 +1,6 @@
 ---
-name: Feature or enhancement
-about: An idea,  feature, or enhancement for this project
+name: Feature or enhancement request
+about: Suggest an idea or enhancement for this project
 title: ''
 labels: enhancement
 assignees: hansintheair

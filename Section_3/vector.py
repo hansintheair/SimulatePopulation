@@ -63,6 +63,10 @@ class Vector:
         """ Scale the vector down if float or int."""
         return Vector(self.vx / scalar, self.vy / scalar)
 
+    def __neg__(self):
+        """ Reverse the vector."""
+        return Vector(-self.vx, -self.vy)
+
     @staticmethod
     def generate(mag):
         vector = Vector(random() - 0.5, random() - 0.5)

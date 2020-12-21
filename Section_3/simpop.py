@@ -27,9 +27,23 @@ def collision(source, target):
     return False
 
 def resolve_collision(source, target):
-    """ Test
+    """ Simple collision resolution wherein source and target entities
+        trade vector.
     """
-    source.motion, target.motion = target.motion, source.motion
+    source.motion, target.motion = target.motion, source.motion    
+
+def resolve_overlap(source, target):
+    """ Resolve the overlap between two entities such that the target entity
+        and the source entity positions are adjusted to the position along
+        their respective vectors at which the entities make first contact.
+    """
+
+    v_st = Vector(source.x - target.x, source.y - target.y)
+    enforce_distance = source.radius + target.radius
+    overlap_distance = enforce_distance - v_st.mag
+
+    source += v_st.unit * round((source.radius / enforce_distance) * overlap_distance, 5)
+    target += -v_st.unit * round((target.radius / enforce_distance) * overlap_distance, 5)
 
 
 class Extent():
@@ -59,7 +73,7 @@ class Entity(ABC):
         self.patch = plt.Circle((x, y), radius) # matplotlib patch
     
     def __iadd__(self, vector):
-        """  Update the location of self by Vector ."""
+        """  Update the location of self by Vector."""
         self.x = self.x + vector.vx
         self.y = self.y + vector.vy
         return self
@@ -92,7 +106,7 @@ class Organism(Entity):
         self.period = 0
 
     def __str__(self):
-        return f"Organism < age: {self.period!r}, location({self.x!r}, {self.y!r})>"
+        return f"Organism <age: {self.period!r}, location({self.x!r}, {self.y!r})>"
     
     def __repr__(self):
         return f"{self.period!r}"
@@ -109,7 +123,7 @@ class Organism(Entity):
         return Organism(
             x=random() * extent.width,
             y=random() * extent.height,
-            motion=Vector.generate(0.2)
+            motion=Vector.generate(0.15)
         )
 
 
@@ -206,6 +220,8 @@ class Environment():
                             )
             for target in targets:
                 resolve_collision(organism, target)
+                resolve_overlap(organism, target)
+
             # Update organism position
             organism()
 
