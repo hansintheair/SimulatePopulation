@@ -165,18 +165,25 @@ class Organism(Entity):
         food.alive = False
         self.energy += food.energy
 
-    def duplicate(self, extent):
+    def duplicate(self, environment):
+        while True:  # Try creating child, repeat if collision with other
+            touch_distance = self.radius * 2
+            vector = Vector.generate(1).unit * round(touch_distance, 5)
+            loc = Point(self.x, self.y)
+            loc += vector
+            child =  Organism(
+                x=loc.x,
+                y=loc.y,
+                motion=Vector.generate(0.15))
+            # Must spawn inside of habitat and must not overlap with organisms
+            if environment.extent.contains(child):
+                if not any(collision(child, target) for group in environment.ents for target in group):
+                    environment.ents.population.append(child)
+                    environment._ax.add_patch(child.patch)
+                    break
         self.reproduce = False
         self.energy -= 1
-        touch_distance = self.radius * 2
-        vector = Vector.generate(1).unit * round(touch_distance, 5)
-        loc = Point(self.x, self.y)
-        loc += vector
-        return Organism(
-            x=loc.x,
-            y=loc.y,
-            motion=Vector.generate(0.15)
-        )
+        return child
 
     @staticmethod
     def spawn(extent):
@@ -282,7 +289,7 @@ class Environment():
                 self.ents.population.remove(organism)
         for organism in self.ents.population:
             if organism.reproduce:
-                child = self.duplicate(organism)
+                child = organism.duplicate(self)
                 offspring.append(child)
                 
 
@@ -317,17 +324,6 @@ class Environment():
             if self.extent.contains(ent):
                 if not any(collision(ent, target) for group in self.ents
                            for target in group):
-                    return ent
-    
-    def duplicate(self, entity):
-        while True:
-            ent = entity.duplicate(self.extent)
-            # Must spawn inside of habitat and must not overlap with others
-            if self.extent.contains(ent):
-                if not any(collision(ent, target) for group in self.ents
-                           for target in group):
-                    self.ents.population.append(ent)
-                    self._ax.add_patch(ent.patch)
                     return ent
                     
                     
