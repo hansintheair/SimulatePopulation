@@ -106,7 +106,7 @@ class Entity(ABC, Point):
    
     @staticmethod
     @abstractmethod
-    def spawn(extent):
+    def spawn(environment):
         """ Every child of Entity must have a static spawn method
             that accepts a required extent parameter."""
         pass
@@ -186,12 +186,16 @@ class Organism(Entity):
         return child
 
     @staticmethod
-    def spawn(extent):
-        return Organism(
-            x=random() * extent.width,
-            y=random() * extent.height,
-            motion=Vector.generate(0.15)
-        )
+    def spawn(environment):
+        while True:
+            organism = Organism(
+                x=random() * environment.extent.width,
+                y=random() * environment.extent.height,
+                motion=Vector.generate(0.15)
+            )
+            if environment.extent.contains(organism):
+                if not any(collision(organism, target) for group in environment.ents for target in group):
+                    return organism
 
 
 class Food(Entity):
@@ -215,11 +219,15 @@ class Food(Entity):
         return f"Food <energy: {self.energy!r}, location({self.x!r}, {self.y!r})>"
 
     @staticmethod
-    def spawn(extent):
-        return Food(
-            x=random() * extent.width,
-            y=random() * extent.height
-        )
+    def spawn(environment):
+        while True:
+            food = Food(
+                x=random() * environment.extent.width,
+                y=random() * environment.extent.height
+            )
+            if environment.extent.contains(food):
+                if not any(collision(food, target) for group in environment.ents for target in group):
+                    return food
 
 
 class Environment():
@@ -242,9 +250,9 @@ class Environment():
         # Simulation data
         self.ents = Entities(population=[], food=[]) # entities existing at start of simulation 
         for _ in range(0, self.starting_pop):
-            self.ents.population.append(self.spawn(Organism))
+            self.ents.population.append(Organism.spawn(self))
         for _ in range(0, self.starting_food):
-            self.ents.food.append(self.spawn(Food))
+            self.ents.food.append(Food.spawn(self))
         self.history = [starting_pop]
         self.mortuary = Counter()
         # Plot attributes
@@ -303,27 +311,15 @@ class Environment():
         self.mortuary.update(mortuary)
         self.ents.population + offspring
 
-    def fig_init(self):
+    def run(self, n_period):
+        return animation.FuncAnimation(self._fig,
+                                       self._fig_animate,
+                                       init_func=self._fig_init,
+                                       frames=n_period)
+    def _fig_init(self):
         for group in self.ents:
             for ent in group:
                 self._ax.add_patch(ent.patch)
         
-    def fig_animate(self, frame):
+    def _fig_animate(self, frame):
         self() #Advance simulation by one frame
-
-    def run(self, n_period):
-        return animation.FuncAnimation(self._fig,
-                                       self.fig_animate,
-                                       init_func=self.fig_init,
-                                       frames=n_period)
-
-    def spawn(self, entity):
-        while True:
-            ent = entity.spawn(self.extent)
-            # Must spawn inside of habitat and must not overlap with others
-            if self.extent.contains(ent):
-                if not any(collision(ent, target) for group in self.ents
-                           for target in group):
-                    return ent
-                    
-                    
