@@ -167,9 +167,10 @@ class Organism(Entity):
 
     def duplicate(self, environment):
         while True:  # Try creating child, repeat if collision with other
+            # Create a child organism adjacent to the parent organism
+            loc = Point(self.x, self.y)
             touch_distance = self.radius * 2
             vector = Vector.generate(1).unit * round(touch_distance, 5)
-            loc = Point(self.x, self.y)
             loc += vector
             child =  Organism(
                 x=loc.x,
@@ -187,12 +188,13 @@ class Organism(Entity):
 
     @staticmethod
     def spawn(environment):
-        while True:
+        while True:  # Try creating child, repeat if collision with other
             organism = Organism(
                 x=random() * environment.extent.width,
                 y=random() * environment.extent.height,
                 motion=Vector.generate(0.15)
             )
+            # Must spawn inside of habitat and must not overlap with organisms
             if environment.extent.contains(organism):
                 if not any(collision(organism, target) for group in environment.ents for target in group):
                     return organism
@@ -220,11 +222,12 @@ class Food(Entity):
 
     @staticmethod
     def spawn(environment):
-        while True:
+        while True:  # Try creating child, repeat if collision with other
             food = Food(
                 x=random() * environment.extent.width,
                 y=random() * environment.extent.height
             )
+            # Must spawn inside of habitat and must not overlap with organisms
             if environment.extent.contains(food):
                 if not any(collision(food, target) for group in environment.ents for target in group):
                     return food
