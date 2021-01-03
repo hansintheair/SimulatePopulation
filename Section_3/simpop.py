@@ -312,10 +312,12 @@ class Environment():
         self.ents.population + offspring
 
     def run(self, n_period):
+        ''' Run the simulation for n periods.'''
         return animation.FuncAnimation(self._fig,
                                        self._fig_animate,
                                        init_func=self._fig_init,
                                        frames=n_period)
+
     def _fig_init(self):
         for group in self.ents:
             for ent in group:
