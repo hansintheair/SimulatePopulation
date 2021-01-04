@@ -179,9 +179,11 @@ class Organism(Entity):
             # Must spawn inside of habitat and must not overlap with organisms
             if environment.extent.contains(child):
                 if not any(collision(child, target) for group in environment.ents for target in group):
+                    # Update environment
                     environment.ents.population.append(child)
                     environment._ax.add_patch(child.patch)
                     break
+        # Update self and return child
         self.reproduce = False
         self.energy -= 1
         return child
@@ -197,6 +199,8 @@ class Organism(Entity):
             # Must spawn inside of habitat and must not overlap with organisms
             if environment.extent.contains(organism):
                 if not any(collision(organism, target) for group in environment.ents for target in group):
+                    environment.ents.population.append(organism)
+                    environment._ax.add_patch(organism.patch)
                     return organism
 
 
@@ -230,6 +234,8 @@ class Food(Entity):
             # Must spawn inside of habitat and must not overlap with organisms
             if environment.extent.contains(food):
                 if not any(collision(food, target) for group in environment.ents for target in group):
+                    environment.ents.food.append(food)
+                    environment._ax.add_patch(food.patch)
                     return food
 
 
@@ -250,19 +256,19 @@ class Environment():
         self.food_rate = food_rate
         self.extent = Extent(*extent)
         self.period = 0
-        # Simulation data
-        self.ents = Entities(population=[], food=[]) # entities existing at start of simulation 
-        for _ in range(0, self.starting_pop):
-            self.ents.population.append(Organism.spawn(self))
-        for _ in range(0, self.starting_food):
-            self.ents.food.append(Food.spawn(self))
-        self.history = [starting_pop]
-        self.mortuary = Counter()
         # Plot attributes
         self._fig, self._ax = plt.subplots(1, 1)
         self._ax.set_xlim(0, self.extent.width)     #Set habitat plane x size
         self._ax.set_ylim(0, self.extent.height)    #Set habitat plane y size
         self._ax.set_aspect('equal')                #Make sure x and y scales equal
+        # Simulation data
+        self.ents = Entities(population=[], food=[]) # entities existing at start of simulation 
+        for _ in range(0, self.starting_pop):
+            Organism.spawn(self)
+        for _ in range(0, self.starting_food):
+            Food.spawn(self)
+        self.history = [starting_pop]
+        self.mortuary = Counter()
 
     def __repr__(self):
         return f"Environment <population: {self.ents.population!r}, extent: {self.extent!r}>"
@@ -318,13 +324,7 @@ class Environment():
         ''' Run the simulation for n periods.'''
         return animation.FuncAnimation(self._fig,
                                        self._fig_animate,
-                                       init_func=self._fig_init,
                                        frames=n_period)
-
-    def _fig_init(self):
-        for group in self.ents:
-            for ent in group:
-                self._ax.add_patch(ent.patch)
         
     def _fig_animate(self, frame):
         self() #Advance simulation by one frame
